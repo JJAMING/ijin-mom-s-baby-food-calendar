@@ -24,12 +24,6 @@ export interface DayPlan {
   meals: MealRecord[];
 }
 
-export interface BabyProfile {
-  name: string;
-  birthDate: string;
-  stage: 'early' | 'mid' | 'late' | 'transition';
-}
-
 export interface CubeRecord {
   id: string;
   name: string;
@@ -54,6 +48,20 @@ export interface PreparationRecord {
   isCompleted: boolean;
 }
 
+export interface SavedRecipe {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface PreparationPlan {
+  id: string;
+  itemName: string;
+  requiredQuantity: number;
+}
+
+// Added ManufacturingRecord interface to fix the compilation error in components/ManufacturingLog.tsx
 export interface ManufacturingRecord {
   id: string;
   title: string;
@@ -61,17 +69,6 @@ export interface ManufacturingRecord {
   cubeCount: number;
   totalWeight: number;
   note?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ManufacturingStore {
-  records: ManufacturingRecord[];
-}
-
-// Fixed missing PreparationPlan export to resolve import error in Settings.tsx
-export interface PreparationPlan {
-  id: string;
-  itemName: string;
-  requiredQuantity: number;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
