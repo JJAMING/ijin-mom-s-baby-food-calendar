@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash-latest";
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
