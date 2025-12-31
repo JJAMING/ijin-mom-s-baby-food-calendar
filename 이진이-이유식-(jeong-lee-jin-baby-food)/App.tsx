@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Heart, LayoutDashboard, Box, ShoppingCart, ChefHat, BarChart3, ClipboardList, History } from 'lucide-react';
+import { Heart, LayoutDashboard, Box, ShoppingCart, ChefHat, BarChart3, ClipboardList } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import parseISO from 'date-fns/parseISO';
 import Calendar from './components/Calendar';
@@ -11,8 +11,7 @@ import RecipeHelper from './components/RecipeHelper';
 import MealDetail from './components/MealDetail';
 import StatsDashboard from './components/StatsDashboard';
 import DayDetailModal from './components/DayDetailModal';
-import ManufacturingLog from './components/ManufacturingLog';
-import { DayPlan, CubeRecord, OrderRecord, MealRecord, PreparationRecord, Ingredient, ManufacturingRecord } from './types';
+import { DayPlan, CubeRecord, OrderRecord, MealRecord, PreparationRecord, Ingredient, SavedRecipe } from './types';
 
 const STORAGE_KEYS = {
   PLANS: 'baby_food_plans_v1',
@@ -21,7 +20,7 @@ const STORAGE_KEYS = {
   PREPS: 'baby_food_preps_v1',
   WEIGHT: 'baby_food_weight_v1',
   STATUSES: 'baby_food_statuses_v1',
-  ARCHIVE: 'baby_food_archive_v1'
+  RECIPES: 'baby_food_recipes_v1'
 };
 
 const App: React.FC = () => {
@@ -39,19 +38,19 @@ const App: React.FC = () => {
   const [cubes, setCubes] = useState<CubeRecord[]>(() => getSavedData(STORAGE_KEYS.CUBES, []));
   const [orders, setOrders] = useState<OrderRecord[]>(() => getSavedData(STORAGE_KEYS.ORDERS, []));
   const [preps, setPreps] = useState<PreparationRecord[]>(() => getSavedData(STORAGE_KEYS.PREPS, []));
-  const [manufacturingRecords, setManufacturingRecords] = useState<ManufacturingRecord[]>(() => getSavedData(STORAGE_KEYS.ARCHIVE, []));
+  const [savedRecipes, setSavedRecipes] = useState<SavedRecipe[]>(() => getSavedData(STORAGE_KEYS.RECIPES, []));
   const [ingredientStatuses, setIngredientStatuses] = useState<Record<string, Ingredient['status']>>(() => getSavedData(STORAGE_KEYS.STATUSES, {}));
   const [weightPerCube, setWeightPerCube] = useState<number>(() => getSavedData(STORAGE_KEYS.WEIGHT, 20));
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'calendar' | 'cubes' | 'preps' | 'orders' | 'recipes' | 'stats' | 'archive'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'cubes' | 'preps' | 'orders' | 'recipes' | 'stats'>('calendar');
   const [isDayModalOpen, setIsDayModalOpen] = useState(false);
   
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.PLANS, JSON.stringify(plans)); }, [plans]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.CUBES, JSON.stringify(cubes)); }, [cubes]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders)); }, [orders]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.PREPS, JSON.stringify(preps)); }, [preps]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.ARCHIVE, JSON.stringify(manufacturingRecords)); }, [manufacturingRecords]);
+  useEffect(() => { localStorage.setItem(STORAGE_KEYS.RECIPES, JSON.stringify(savedRecipes)); }, [savedRecipes]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.WEIGHT, weightPerCube.toString()); }, [weightPerCube]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.STATUSES, JSON.stringify(ingredientStatuses)); }, [ingredientStatuses]);
 
@@ -64,7 +63,6 @@ const App: React.FC = () => {
     setCubes(prev => prev.map(c => {
       if (c.id === id) {
         const updatedCube = { ...c, ...updates };
-        // 제조일만 변경되고 만료일은 따로 전달되지 않은 경우에만 자동 계산
         if (updates.madeDate && !updates.expiryDate) {
           updatedCube.expiryDate = format(addDays(parseISO(updates.madeDate), 14), 'yyyy-MM-dd');
         }
@@ -94,7 +92,6 @@ const App: React.FC = () => {
     
     handleUpdateCubeQuantity(cubeId, -1);
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    
     const actualWeight = cube.weight || weightPerCube;
     
     const newMeal: MealRecord = {
@@ -128,19 +125,6 @@ const App: React.FC = () => {
     });
   };
 
-  const handleUpdateMeal = (mealId: string, updates: Partial<MealRecord>) => {
-    setPlans(prev => prev.map(plan => ({
-      ...plan,
-      meals: plan.meals.map(meal => {
-        if (meal.id === mealId) {
-          const updatedMeal = { ...meal, ...updates };
-          return updatedMeal;
-        }
-        return meal;
-      }).sort((a, b) => (a.fedTime || "").localeCompare(b.fedTime || ""))
-    })));
-  };
-
   const handleDeleteMeal = (mealId: string) => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     const currentDayPlan = plans.find(p => p.date === dateStr);
@@ -156,9 +140,18 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-    setIsDayModalOpen(true);
+  const handleSaveRecipe = (title: string, content: string) => {
+    const newRecipe: SavedRecipe = {
+      id: Math.random().toString(36).substr(2, 9),
+      title,
+      content,
+      createdAt: new Date().toISOString()
+    };
+    setSavedRecipes(prev => [newRecipe, ...prev]);
+  };
+
+  const handleDeleteRecipe = (id: string) => {
+    setSavedRecipes(prev => prev.filter(r => r.id !== id));
   };
 
   const dayPlan = plans.find(p => p.date === format(selectedDate, 'yyyy-MM-dd'));
@@ -185,7 +178,6 @@ const App: React.FC = () => {
              <button onClick={() => setActiveTab('preps')} className={`p-2 rounded-xl transition-all ${activeTab === 'preps' ? 'bg-amber-50 text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="제조 예정"><ClipboardList className="w-5 h-5 sm:w-6 h-6" /></button>
              <button onClick={() => setActiveTab('orders')} className={`p-2 rounded-xl transition-all ${activeTab === 'orders' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="주문"><ShoppingCart className="w-5 h-5 sm:w-6 h-6" /></button>
              <button onClick={() => setActiveTab('recipes')} className={`p-2 rounded-xl transition-all ${activeTab === 'recipes' ? 'bg-purple-50 text-purple-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="레시피"><ChefHat className="w-5 h-5 sm:w-6 h-6" /></button>
-             <button onClick={() => setActiveTab('archive')} className={`p-2 rounded-xl transition-all ${activeTab === 'archive' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="아카이브"><History className="w-5 h-5 sm:w-6 h-6" /></button>
              <button onClick={() => setActiveTab('stats')} className={`p-2 rounded-xl transition-all ${activeTab === 'stats' ? 'bg-blue-50 text-blue-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`} title="통계"><BarChart3 className="w-5 h-5 sm:w-6 h-6" /></button>
           </div>
         </div>
@@ -195,7 +187,7 @@ const App: React.FC = () => {
         {activeTab === 'calendar' && (
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 md:gap-8 items-start">
             <div className="sm:col-span-7 lg:col-span-8">
-              <Calendar plans={plans} cubes={cubes} orders={orders} preps={preps} selectedDate={selectedDate} onDateSelect={handleDateClick} />
+              <Calendar plans={plans} cubes={cubes} orders={orders} preps={preps} selectedDate={selectedDate} onDateSelect={(d) => { setSelectedDate(d); setIsDayModalOpen(true); }} />
             </div>
             <div className="sm:col-span-5 lg:col-span-4 h-full">
               <MealDetail date={selectedDate} plan={dayPlan} availableCubes={cubes.filter(c => c.quantity > 0)} onAddMeal={() => {}} onDeleteMeal={handleDeleteMeal} onFeedCube={handleFeedCube} onAIRecommend={() => setActiveTab('recipes')} />
@@ -205,13 +197,7 @@ const App: React.FC = () => {
 
         {activeTab === 'cubes' && (
           <div className="max-w-2xl mx-auto">
-            <CubeManager 
-              cubes={cubes} 
-              onAddCube={handleAddCube} 
-              onDeleteCube={handleDeleteCube} 
-              onUpdateQuantity={handleUpdateCubeQuantity}
-              onUpdateCube={handleUpdateCube}
-            />
+            <CubeManager cubes={cubes} onAddCube={handleAddCube} onDeleteCube={handleDeleteCube} onUpdateQuantity={handleUpdateCubeQuantity} onUpdateCube={handleUpdateCube} />
           </div>
         )}
 
@@ -219,16 +205,24 @@ const App: React.FC = () => {
 
         {activeTab === 'orders' && <div className="max-w-2xl mx-auto"><OrderLog orders={orders} onAddOrder={(d) => setOrders(prev => [{...d, id: Math.random().toString(36).substr(2, 9)}, ...prev])} onToggleOrder={(id) => setOrders(prev => prev.map(o => o.id === id ? { ...o, isReceived: !o.isReceived } : o))} onUpdateOrder={(id, u) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...u } : o))} onDeleteOrder={(id) => setOrders(prev => prev.filter(o => o.id !== id))} /></div>}
 
-        {activeTab === 'recipes' && <div className="max-w-3xl mx-auto"><RecipeHelper weightPerCube={weightPerCube} onUpdateWeight={setWeightPerCube} /></div>}
-
-        {activeTab === 'archive' && <div className="max-w-2xl mx-auto"><ManufacturingLog records={manufacturingRecords} onUpdateRecord={(id, u) => setManufacturingRecords(prev => prev.map(r => r.id === id ? {...r, ...u, updatedAt: new Date().toISOString()} : r))} onDeleteRecord={(id) => setManufacturingRecords(prev => prev.filter(r => r.id !== id))} /></div>}
+        {activeTab === 'recipes' && (
+          <div className="max-w-3xl mx-auto">
+            <RecipeHelper 
+              weightPerCube={weightPerCube} 
+              onUpdateWeight={setWeightPerCube} 
+              savedRecipes={savedRecipes}
+              onSaveRecipe={handleSaveRecipe}
+              onDeleteRecipe={handleDeleteRecipe}
+            />
+          </div>
+        )}
 
         {activeTab === 'stats' && <div className="max-w-4xl mx-auto"><StatsDashboard plans={plans} cubes={cubes} weightPerCube={weightPerCube} ingredientStatuses={ingredientStatuses} onUpdateIngredientStatus={(name, status) => setIngredientStatuses(prev => ({ ...prev, [name]: status }))} /></div>}
       </main>
 
       <DayDetailModal 
         isOpen={isDayModalOpen} onClose={() => setIsDayModalOpen(false)} date={selectedDate} plan={dayPlan} cubesMade={dayCubesMade} preps={dayPreps} orders={dayOrders}
-        onDeleteMeal={handleDeleteMeal} onUpdateMeal={handleUpdateMeal}
+        onDeleteMeal={handleDeleteMeal} onUpdateMeal={(id, u) => setPlans(prev => prev.map(plan => ({...plan, meals: plan.meals.map(meal => meal.id === id ? {...meal, ...u} : meal)})))}
         onTogglePrep={(id) => setPreps(prev => prev.map(p => p.id === id ? { ...p, isCompleted: !p.isCompleted } : p))}
         onUpdatePrep={(id, u) => setPreps(prev => prev.map(p => p.id === id ? { ...p, ...u } : p))}
         onDeletePrep={(id) => setPreps(prev => prev.filter(p => p.id !== id))}
