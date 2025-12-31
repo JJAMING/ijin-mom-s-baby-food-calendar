@@ -24,10 +24,11 @@ export async function searchRecipe(query: string, weightPerCube: number, targetC
     body: JSON.stringify({ query, weightPerCube, targetCount }),
   });
 
-  if (!res.ok) throw new Error(await res.text());
   const data = await res.json();
-  return (data.text ?? "") as string;
+  if (!res.ok) throw new Error(data?.error || "레시피 생성 실패");
+  return data.text as string;
 }
+
 
 export async function getNutritionTips(ageInMonths: number) {
   const res = await fetch("/api/nutrition-tips", {
