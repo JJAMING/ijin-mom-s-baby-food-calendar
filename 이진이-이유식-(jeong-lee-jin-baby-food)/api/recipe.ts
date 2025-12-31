@@ -1,37 +1,54 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI } from "@google/genai";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash"; // 안정형 기본값
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
+export default async function handler(req: any, res: any) {
+  if (req.method !== "POST") {
+    res.statusCode = 405;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+    return;
+  }
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
+    if (!apiKey) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: "Missing GEMINI_API_KEY" }));
+      return;
+    }
 
-    const { query, weightPerCube, targetCount, prompt } = (req.body ?? {}) as any;
+    const body = req.body ?? {};
+    const query = String(body.query ?? "");
+    const weightPerCube = Number(body.weightPerCube ?? 0);
+    const targetCount = Number(body.targetCount ?? 0);
+    const prompt = typeof body.prompt === "string" ? body.prompt : "";
 
-    // 기존 코드 호환: prompt로 들어와도 처리
     const finalPrompt =
-      (typeof prompt === "string" && prompt.trim()) ||
-      buildRecipePrompt(String(query ?? ""), Number(weightPerCube ?? 0), Number(targetCount ?? 0));
+      (prompt && prompt.trim()) || buildRecipePrompt(query, weightPerCube, targetCount);
 
-    if (!finalPrompt.trim()) return res.status(400).json({ error: "Missing query/prompt" });
+    if (!finalPrompt.trim()) {
+      res.statusCode = 400;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: "Missing query/prompt" }));
+      return;
+    }
 
     const ai = new GoogleGenAI({ apiKey });
-
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: finalPrompt,
-      config: {
-        thinkingConfig: { thinkingBudget: 0 },
-      },
+      config: { thinkingConfig: { thinkingBudget: 0 } },
     });
 
-    return res.status(200).json({ text: response.text ?? "" });
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ text: response.text ?? "" }));
   } catch (e: any) {
-    return res.status(500).json({ error: "Server error", detail: String(e?.message ?? e) });
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "Server error", detail: String(e?.message ?? e) }));
   }
 }
 
