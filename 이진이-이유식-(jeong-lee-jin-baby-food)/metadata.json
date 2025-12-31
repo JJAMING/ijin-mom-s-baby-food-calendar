@@ -1,0 +1,7 @@
+{
+  "name": "이진이 이유식 (Jeong Lee Jin Baby Food)",
+  "description": "정이진을 위한 맞춤형 이유식 플래너 및 큐브 관리 앱",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
