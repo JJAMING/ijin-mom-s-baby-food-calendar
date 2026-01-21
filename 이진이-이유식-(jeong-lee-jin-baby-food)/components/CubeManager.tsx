@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
 import { format, addDays, differenceInDays } from 'date-fns';
-// Fix: Use individual imports for startOfDay and parseISO to resolve module export errors
 import startOfDay from 'date-fns/startOfDay';
 import parseISO from 'date-fns/parseISO';
-import { Box, Plus, Minus, Trash2, Calendar as CalendarIcon, Check, AlertTriangle, Scale, Edit2, X, Save } from 'lucide-react';
+import { Box, Plus, Minus, Trash2, Calendar as CalendarIcon, Check, AlertTriangle, Scale, Edit2, X, Save, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { CubeRecord } from '../types';
 
 interface CubeManagerProps {
@@ -16,12 +15,18 @@ interface CubeManagerProps {
 }
 
 const PRESET_COLORS = [
-  { name: 'blue', hex: '#93c5fd', bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' },
-  { name: 'green', hex: '#86efac', bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' },
-  { name: 'yellow', hex: '#fde047', bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
-  { name: 'pink', hex: '#f9a8d4', bg: 'bg-pink-100', text: 'text-pink-600', border: 'border-pink-200' },
-  { name: 'orange', hex: '#fdba74', bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-200' },
-  { name: 'purple', hex: '#d8b4fe', bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
+  { name: 'blue', hex: '#93c5fd' },
+  { name: 'green', hex: '#86efac' },
+  { name: 'yellow', hex: '#fde047' },
+  { name: 'pink', hex: '#f9a8d4' },
+  { name: 'orange', hex: '#fdba74' },
+  { name: 'purple', hex: '#d8b4fe' },
+  // 추가된 색상 5종
+  { name: 'mint', hex: '#a7f3d0' },
+  { name: 'olive', hex: '#bef264' },
+  { name: 'latte', hex: '#e5e7eb' },
+  { name: 'rose', hex: '#fca5a5' },
+  { name: 'slate', hex: '#94a3b8' },
 ];
 
 const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCube, onUpdateQuantity, onUpdateCube }) => {
@@ -55,7 +60,6 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
 
   const handleEditMadeDateChange = (val: string) => {
     setEditMadeDate(val);
-    // 제조일을 수정하면 만료일도 일단 자동으로 14일 뒤로 맞춤
     setEditExpiryDate(format(addDays(parseISO(val), 14), 'yyyy-MM-dd'));
   };
 
@@ -131,67 +135,90 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
           </div>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">보관 수량</label>
-                <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl p-1.5 h-[52px]">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block">보관 수량</label>
+                <div className="flex items-center justify-between">
                   <button 
                     type="button" 
                     onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                    className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white rounded-xl transition-all"
+                    className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white rounded-xl transition-all shadow-sm"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="text-lg font-black text-slate-700">{quantity}</span>
+                  <span className="text-2xl font-black text-slate-700">{quantity}개</span>
                   <button 
                     type="button" 
                     onClick={() => setQuantity(prev => prev + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white rounded-xl transition-all"
+                    className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-white rounded-xl transition-all shadow-sm"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block text-blue-500">개당 무게 (g)</label>
-                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-2xl p-1.5 h-[52px]">
-                  <button 
-                    type="button" 
-                    onClick={() => setWeight(prev => Math.max(10, prev - 5))}
-                    className="w-8 h-8 flex items-center justify-center text-blue-300 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <div className="flex flex-col items-center">
-                    <span className="text-lg font-black text-blue-700 leading-none">{weight}</span>
-                    <span className="text-[8px] font-bold text-blue-400">GRAM</span>
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[10px] font-bold text-blue-500 uppercase">개당 무게 (g)</label>
+                  <span className="text-xs font-black text-blue-700 bg-white px-2 py-0.5 rounded-full shadow-sm">{weight}g</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-1 items-center gap-1">
+                    <button 
+                      type="button" 
+                      onClick={() => setWeight(prev => Math.max(5, prev - 5))}
+                      className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
+                      title="-5g"
+                    >
+                      <ChevronsLeft className="w-4 h-4" />
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setWeight(prev => Math.max(5, prev - 1))}
+                      className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
+                      title="-1g"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={() => setWeight(prev => Math.min(100, prev + 5))}
-                    className="w-8 h-8 flex items-center justify-center text-blue-300 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                  
+                  <div className="flex flex-1 items-center gap-1">
+                    <button 
+                      type="button" 
+                      onClick={() => setWeight(prev => Math.min(100, prev + 1))}
+                      className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
+                      title="+1g"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setWeight(prev => Math.min(100, prev + 5))}
+                      className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
+                      title="+5g"
+                    >
+                      <ChevronsRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div>
               <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block">재료 색상</label>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 max-w-[300px]">
                 {PRESET_COLORS.map((color) => (
                   <button
                     key={color.hex}
                     type="button"
                     onClick={() => setSelectedColor(color.hex)}
-                    className={`w-9 h-9 rounded-full border-2 transition-all flex items-center justify-center ${
+                    className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${
                       selectedColor === color.hex ? 'border-slate-800 scale-110 shadow-md' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: color.hex }}
+                    title={color.name}
                   >
-                    {selectedColor === color.hex && <Check className="w-5 h-5 text-slate-800" />}
+                    {selectedColor === color.hex && <Check className="w-4 h-4 text-slate-800" />}
                   </button>
                 ))}
               </div>
@@ -244,20 +271,21 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
                         placeholder="이름"
                       />
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-xl border border-blue-100">
-                           <Scale className="w-3 h-3 text-blue-500" />
-                           <input 
-                            type="number" 
-                            value={editWeight} 
-                            onChange={(e) => setEditWeight(parseInt(e.target.value) || 0)}
-                            className="w-12 bg-transparent text-xs font-black text-blue-700 outline-none"
-                           />
-                           <span className="text-[10px] font-bold text-blue-400">g</span>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="flex items-center justify-between bg-blue-50 px-3 py-2 rounded-xl border border-blue-100">
+                           <div className="flex items-center gap-1">
+                             <Scale className="w-3 h-3 text-blue-500" />
+                             <span className="text-[10px] font-bold text-blue-400 uppercase">무게 설정</span>
+                           </div>
+                           <div className="flex items-center gap-2">
+                             <button onClick={() => setEditWeight(prev => Math.max(5, prev - 1))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Minus className="w-3 h-3"/></button>
+                             <span className="text-xs font-black text-blue-700 w-8 text-center">{editWeight}g</span>
+                             <button onClick={() => setEditWeight(prev => Math.min(100, prev + 1))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Plus className="w-3 h-3"/></button>
+                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => saveEditing(cube.id)} className="flex-1 py-1.5 bg-pink-500 text-white rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"><Save className="w-3 h-3"/>저장</button>
-                          <button onClick={() => setEditingId(null)} className="flex-1 py-1.5 bg-slate-200 text-slate-600 rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"><X className="w-3 h-3"/>취소</button>
+                          <button onClick={() => saveEditing(cube.id)} className="flex-1 py-2 bg-pink-500 text-white rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"><Save className="w-3 h-3"/>저장</button>
+                          <button onClick={() => setEditingId(null)} className="flex-1 py-2 bg-slate-200 text-slate-600 rounded-xl flex items-center justify-center gap-1 text-[10px] font-black"><X className="w-3 h-3"/>취소</button>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
