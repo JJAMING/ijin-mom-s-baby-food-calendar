@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import parseISO from 'date-fns/parseISO';
 import startOfDay from 'date-fns/startOfDay';
-import { Trash2, Sparkles, Box, Clock, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { Trash2, Sparkles, Box, Clock, Calendar as CalendarIcon, AlertCircle, Scale } from 'lucide-react';
 import { DayPlan, MealType, CubeRecord } from '../types';
 
 interface MealDetailProps {
@@ -69,6 +69,12 @@ const MealDetail: React.FC<MealDetailProps> = ({ date, plan, availableCubes, onD
 
   const formattedTimeStr = getFormattedTime();
 
+  // 오늘 총 급여량 계산
+  const totalFedWeight = plan?.meals.reduce((acc, meal) => {
+    const weightValue = parseInt(meal.amount.replace(/[^0-9]/g, '')) || 0;
+    return acc + weightValue;
+  }, 0) || 0;
+
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-slate-100 h-full flex flex-col overflow-hidden">
       <div className="p-4 lg:p-6 bg-white border-b border-slate-50">
@@ -121,14 +127,23 @@ const MealDetail: React.FC<MealDetailProps> = ({ date, plan, availableCubes, onD
       <div className="flex-1 space-y-4 overflow-y-auto p-4 lg:p-6 custom-scrollbar">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-black text-slate-700 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-orange-500" />
-              급여 기록
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-black text-slate-700 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-orange-500" />
+                급여 기록
+              </h3>
+              {totalFedWeight > 0 && (
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black border border-orange-200">
+                  <Scale className="w-2.5 h-2.5" />
+                  총 {totalFedWeight}g
+                </div>
+              )}
+            </div>
             <button 
               onClick={onAIRecommend}
               className="p-1 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors"
             >
+              <span className="sr-only">AI 추천</span>
               <Sparkles className="w-3.5 h-3.5" />
             </button>
           </div>
