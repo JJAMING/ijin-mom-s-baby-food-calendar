@@ -7,14 +7,13 @@ import {
   isSameDay, 
   addMonths, 
   endOfWeek,
-  differenceInDays
+  differenceInDays,
+  parseISO,
+  startOfDay,
+  startOfMonth,
+  subMonths,
+  startOfWeek
 } from 'date-fns';
-// Fix: Use individual imports for parseISO and startOfDay to resolve module export errors
-import parseISO from 'date-fns/parseISO';
-import startOfDay from 'date-fns/startOfDay';
-import startOfMonth from 'date-fns/startOfMonth';
-import subMonths from 'date-fns/subMonths';
-import startOfWeek from 'date-fns/startOfWeek';
 import { ko } from 'date-fns/locale/ko';
 import { ChevronLeft, ChevronRight, Baby, Box, AlertCircle, ShoppingCart, Utensils, ClipboardList } from 'lucide-react';
 import { DayPlan, CubeRecord, OrderRecord, PreparationRecord } from '../types';
