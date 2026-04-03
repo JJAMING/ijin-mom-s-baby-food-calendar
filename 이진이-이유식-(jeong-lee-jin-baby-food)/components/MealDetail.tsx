@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, differenceInDays } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
-import startOfDay from 'date-fns/startOfDay';
+import { format, differenceInDays, parseISO, startOfDay } from 'date-fns';
 import { Trash2, Sparkles, Box, Clock, Calendar as CalendarIcon, AlertCircle, Scale } from 'lucide-react';
 import { DayPlan, MealType, CubeRecord } from '../types';
 
