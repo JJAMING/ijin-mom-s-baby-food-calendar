@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Heart, LayoutDashboard, Box, ShoppingCart, ChefHat, BarChart3, ClipboardList } from 'lucide-react';
-import { format, addDays } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
+import { format, addDays, parseISO } from 'date-fns';
 import Calendar from './components/Calendar';
 import CubeManager from './components/CubeManager';
 import OrderLog from './components/OrderLog';
