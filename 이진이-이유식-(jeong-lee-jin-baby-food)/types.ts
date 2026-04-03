@@ -31,7 +31,7 @@ export interface CubeRecord {
   expiryDate: string; // YYYY-MM-DD
   quantity: number;
   color: string; // HEX or Tailwind color class
-  weight: number; // 개별 큐브의 무게 (10g ~ 100g)
+  weight: number; // 개별 큐브의 무게 (5g ~ 300g)
 }
 
 export interface OrderRecord {
