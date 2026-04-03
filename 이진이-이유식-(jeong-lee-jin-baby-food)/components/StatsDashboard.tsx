@@ -15,8 +15,7 @@ import {
   Eye,
   AlertTriangle
 } from 'lucide-react';
-import { differenceInDays } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
+import { differenceInDays, parseISO } from 'date-fns';
 
 interface StatsDashboardProps {
   plans: DayPlan[];
