@@ -12,7 +12,7 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ weightPerCube, onUpdateWeight, prepPlans, onUpdatePrepPlans }) => {
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'prep'>('general');
-  const weightOptions = [10, 15, 20, 25, 30];
+  const weightOptions = [10, 20, 30, 50, 100, 200, 300];
   
   // Prep Plan Form State
   const [newItemName, setNewItemName] = useState('');
@@ -97,7 +97,7 @@ const Settings: React.FC<SettingsProps> = ({ weightPerCube, onUpdateWeight, prep
                 <ul className="list-disc ml-4 space-y-1">
                   <li>초기: 큐브 당 10~15g이 적당해요.</li>
                   <li>중기: 큐브 당 20~25g으로 늘려주세요.</li>
-                  <li>후기: 아이의 식사량에 맞춰 30g까지 조절하세요.</li>
+                  <li>후기/완료기: 아이의 식사량에 맞춰 30g 이상으로 조절하세요. (최대 300g)</li>
                 </ul>
               </div>
             </section>
