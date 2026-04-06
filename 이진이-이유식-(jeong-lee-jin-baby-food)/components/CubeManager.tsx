@@ -172,9 +172,9 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
                     </button>
                     <button 
                       type="button" 
-                      onClick={() => setWeight(prev => Math.max(5, prev - 10))}
+                      onClick={() => setWeight(prev => Math.max(5, prev - 1))}
                       className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
-                      title="-10g"
+                      title="-1g"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
@@ -183,9 +183,9 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
                   <div className="flex flex-1 items-center gap-1">
                     <button 
                       type="button" 
-                      onClick={() => setWeight(prev => Math.min(300, prev + 10))}
+                      onClick={() => setWeight(prev => Math.min(300, prev + 1))}
                       className="flex-1 h-9 flex items-center justify-center bg-white text-blue-400 hover:text-blue-600 rounded-lg border border-blue-100 shadow-sm transition-all"
-                      title="+10g"
+                      title="+1g"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -276,9 +276,9 @@ const CubeManager: React.FC<CubeManagerProps> = ({ cubes, onAddCube, onDeleteCub
                              <span className="text-[10px] font-bold text-blue-400 uppercase">무게 설정</span>
                            </div>
                            <div className="flex items-center gap-2">
-                             <button onClick={() => setEditWeight(prev => Math.max(5, prev - 10))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Minus className="w-3 h-3"/></button>
+                             <button onClick={() => setEditWeight(prev => Math.max(5, prev - 1))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Minus className="w-3 h-3"/></button>
                              <span className="text-xs font-black text-blue-700 w-8 text-center">{editWeight}g</span>
-                             <button onClick={() => setEditWeight(prev => Math.min(300, prev + 10))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Plus className="w-3 h-3"/></button>
+                             <button onClick={() => setEditWeight(prev => Math.min(300, prev + 1))} className="p-1 bg-white rounded border border-blue-100 text-blue-500"><Plus className="w-3 h-3"/></button>
                            </div>
                         </div>
                         <div className="flex items-center gap-2">
